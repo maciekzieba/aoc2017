@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/maciekzieba/aoc2017/day20/domain"
 	"github.com/maciekzieba/aoc2017/day20/input"
@@ -9,12 +10,18 @@ import (
 
 func main() {
 	particles := input.LoadData()
+	var wg sync.WaitGroup
+	wg.Add(len(particles))
 
-	for j := 0; j < 10000; j++ {
-		for i := range particles {
-			particles[i].Tick()
-		}
+	for i := range particles {
+		go func(pId int) {
+			for j := 0; j < 10000; j++ {
+				particles[pId].Tick()
+			}
+			wg.Done()
+		}(i)
 	}
+	wg.Wait()
 
 	cp := domain.Particle{}
 	for _, p := range particles {
@@ -23,5 +30,5 @@ func main() {
 		}
 	}
 
-	fmt.Printf("Result:%d", cp.ID)
+	fmt.Println("Result:", cp.ID)
 }
